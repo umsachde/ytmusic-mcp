@@ -2,9 +2,12 @@
 __pycache__/
 *.pyc
 .DS_Store
+.idea/
+*.egg-info/
 
 # ytmusicapi auth — never commit
 headers_auth.json
 oauth.json
 *.headers.json
+raw_headers.txt
 .env
