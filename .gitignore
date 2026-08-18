@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# ytmusicapi auth — never commit
+headers_auth.json
+oauth.json
+*.headers.json
+.env
