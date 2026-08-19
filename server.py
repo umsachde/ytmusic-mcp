@@ -115,6 +115,25 @@ def add_to_playlist(playlist_id: str, video_id: str) -> str:
 
 @mcp.tool()
 @handle_errors
+def remove_from_playlist(playlist_id: str, video_id: str) -> str:
+    """Remove every occurrence of a track from a playlist by video ID.
+
+    Looks up the playlist entry (or entries, if the song was added more than
+    once) internally, so only the video ID is needed. Returns a message
+    stating how many occurrences were removed -- 0 if the video ID wasn't in
+    the playlist.
+    """
+    yt = _client()
+    tracks = yt.get_playlist(playlist_id, limit=None).get("tracks", [])
+    matches = [t for t in tracks if t.get("videoId") == video_id]
+    if not matches:
+        return f"{video_id} was not found in playlist {playlist_id}; nothing removed."
+    yt.remove_playlist_items(playlist_id, matches)
+    return f"Removed {len(matches)} occurrence(s) of {video_id} from playlist {playlist_id}."
+
+
+@mcp.tool()
+@handle_errors
 def get_history() -> list[dict[str, Any]]:
     """Get recent play history."""
     return _client().get_history()

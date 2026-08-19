@@ -11,6 +11,7 @@ An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https:/
 | `get_playlist_tracks(playlist_id)` | Get the tracks in a playlist. |
 | `create_playlist(name, description="")` | Create a new private playlist, returns its ID. |
 | `add_to_playlist(playlist_id, video_id)` | Add a track to a playlist. |
+| `remove_from_playlist(playlist_id, video_id)` | Remove every occurrence of a track from a playlist by video ID. |
 | `get_history()` | Get your recent play history. |
 
 **Not included (v1):** BPM-based recommendations. YouTube Music doesn't expose tempo data, so this would need a second data source (e.g. an audio analysis API) — a stretch goal for a future version, not part of this build.
