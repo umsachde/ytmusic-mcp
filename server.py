@@ -88,9 +88,12 @@ def get_playlists() -> list[dict[str, Any]]:
 
 @mcp.tool()
 @handle_errors
-def get_playlist_tracks(playlist_id: str) -> list[dict[str, Any]]:
-    """Get the tracks in a playlist."""
-    return _client().get_playlist(playlist_id).get("tracks", [])
+def get_playlist_tracks(playlist_id: str, limit: int | None = None) -> list[dict[str, Any]]:
+    """Get the tracks in a playlist.
+
+    limit: max tracks to return. Omit (or pass null) to fetch the entire playlist.
+    """
+    return _client().get_playlist(playlist_id, limit=limit).get("tracks", [])
 
 
 @mcp.tool()
