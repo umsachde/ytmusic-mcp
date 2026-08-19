@@ -12,6 +12,7 @@ An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https:/
 | `create_playlist(name, description="")` | Create a new private playlist, returns its ID. |
 | `add_to_playlist(playlist_id, video_id)` | Add a track to a playlist. |
 | `remove_from_playlist(playlist_id, video_id)` | Remove every occurrence of a track from a playlist by video ID. |
+| `remove_playlist(playlist_id)` | Permanently delete a playlist you own. Refuses to touch the auto playlists `LM` and `SE`. |
 | `get_history()` | Get your recent play history. |
 
 **Not included (v1):** BPM-based recommendations. YouTube Music doesn't expose tempo data, so this would need a second data source (e.g. an audio analysis API) — a stretch goal for a future version, not part of this build.
@@ -64,6 +65,17 @@ claude mcp add ytmusic -s user \
 `-s user` makes it available in any Claude Code session, not just this directory. Use absolute paths for the python interpreter, `server.py`, and `YTMUSIC_AUTH_PATH` since the server can be launched from any working directory.
 
 For other MCP clients (Claude Desktop, etc.), point them at the same command and env var using their respective config format.
+
+## Testing
+
+The unit test suite (`tests/`) runs against a hand-rolled fake YTMusic client — no network access or `headers_auth.json` needed:
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+`scripts/test_search.py` is a separate real-account smoke test, not part of the unit suite.
 
 ## Error handling
 

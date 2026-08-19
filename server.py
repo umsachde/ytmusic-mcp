@@ -46,6 +46,8 @@ def handle_errors(fn):
             ) from e
         except json.JSONDecodeError as e:
             raise RuntimeError(f"YouTube Music returned an unexpected response. {AUTH_HELP}") from e
+        except YTMusicGatedError as e:
+            raise RuntimeError(f"This content is gated/restricted and unavailable: {e}") from e
         except YTMusicServerError as e:
             msg = str(e)
             if "HTTP 401" in msg or "HTTP 403" in msg:
@@ -55,8 +57,6 @@ def handle_errors(fn):
                     "YouTube Music is rate-limiting requests right now. Wait a bit and try again."
                 ) from e
             raise RuntimeError(f"YouTube Music server error: {msg}") from e
-        except YTMusicGatedError as e:
-            raise RuntimeError(f"This content is gated/restricted and unavailable: {e}") from e
         except YTMusicUserError as e:
             raise RuntimeError(str(e)) from e
         except YTMusicError as e:
@@ -130,6 +130,22 @@ def remove_from_playlist(playlist_id: str, video_id: str) -> str:
         return f"{video_id} was not found in playlist {playlist_id}; nothing removed."
     yt.remove_playlist_items(playlist_id, matches)
     return f"Removed {len(matches)} occurrence(s) of {video_id} from playlist {playlist_id}."
+
+
+@mcp.tool()
+@handle_errors
+def remove_playlist(playlist_id: str) -> str:
+    """Permanently delete a playlist you own.
+
+    This cannot be undone -- the playlist itself is removed from your
+    YouTube Music library, not just emptied. Does not affect the songs
+    inside it (they aren't deleted, just no longer grouped under this
+    playlist). Refuses to touch the auto playlists "LM" (Liked Music) and
+    "SE" (Episodes for Later), which aren't deletable playlists.
+    """
+    if playlist_id in ("LM", "SE"):
+        raise RuntimeError(f"{playlist_id} is an auto playlist and can't be deleted.")
+    return str(_client().delete_playlist(playlist_id))
 
 
 @mcp.tool()
