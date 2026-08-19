@@ -12,6 +12,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0"]
+browser-auth = ["browser_cookie3>=0.19"]
 
 [project.urls]
 Homepage = "https://github.com/umsachde/ytmusic-mcp"

@@ -13,7 +13,7 @@ from ytmusicapi.exceptions import YTMusicError, YTMusicGatedError, YTMusicServer
 AUTH_PATH = os.environ.get("YTMUSIC_AUTH_PATH", "headers_auth.json")
 AUTH_HELP = (
     f"YouTube Music auth at {AUTH_PATH} looks invalid or expired. "
-    "Re-run scripts/setup_auth_from_file.py to refresh it (see README)."
+    "Re-run scripts/setup_auth_from_browser.py (or scripts/setup_auth_from_file.py) to refresh it (see README)."
 )
 
 mcp = MCPServer("ytmusic")
@@ -42,7 +42,7 @@ def handle_errors(fn):
             return fn(*args, **kwargs)
         except FileNotFoundError as e:
             raise RuntimeError(
-                f"{AUTH_PATH} not found. Run scripts/setup_auth_from_file.py to authenticate."
+                f"{AUTH_PATH} not found. Run scripts/setup_auth_from_browser.py to authenticate."
             ) from e
         except json.JSONDecodeError as e:
             raise RuntimeError(f"YouTube Music returned an unexpected response. {AUTH_HELP}") from e

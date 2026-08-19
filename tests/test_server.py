@@ -262,7 +262,7 @@ def test_handle_errors_file_not_found():
     def fn():
         raise FileNotFoundError()
 
-    with pytest.raises(RuntimeError, match="setup_auth_from_file.py"):
+    with pytest.raises(RuntimeError, match="setup_auth_from_browser.py"):
         fn()
     with pytest.raises(RuntimeError, match=AUTH_PATH.replace(".", r"\.")):
         fn()

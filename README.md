@@ -29,7 +29,26 @@ pip install -e .
 
 ### 2. Authenticate
 
-There's no official YouTube Music API, so `ytmusicapi` authenticates by reusing headers from your logged-in browser session.
+There's no official YouTube Music API, so `ytmusicapi` authenticates by reusing headers from your logged-in browser session. Both methods below write the same `headers_auth.json` file, so you can switch between them freely.
+
+#### Option A: Auto-extract from your browser (recommended)
+
+Reads your existing YouTube Music session cookies straight from your browser's local storage — no DevTools, no copy-pasting.
+
+```bash
+pip install -e ".[browser-auth]"
+python scripts/setup_auth_from_browser.py --browser firefox   # or chrome, safari, edge, brave, opera, vivaldi, arc
+```
+
+Requires being logged into [music.youtube.com](https://music.youtube.com) in that browser. Omit `--browser` to try every installed browser and use the first one with a valid session.
+
+Notes:
+- Chrome/Edge/Brave/Opera/Vivaldi/Arc encrypt their cookie store; on macOS this may trigger a one-time Keychain permission prompt.
+- Some browsers lock their cookie database while running — close the browser first if extraction fails.
+
+#### Option B: Manual header paste (fallback)
+
+Use this if browser auto-extraction doesn't work for your setup.
 
 1. Open [music.youtube.com](https://music.youtube.com) in **Firefox** (recommended — its raw-header copy is more reliable than Chrome's) while logged in.
 2. Open DevTools (`Cmd+Option+I` / `F12`) → **Network** tab → filter by `browse`.
@@ -44,6 +63,8 @@ There's no official YouTube Music API, so `ytmusicapi` authenticates by reusing 
 
 Alternatively, `python scripts/setup_auth.py` does the same thing via an interactive terminal prompt instead of a file, if you prefer to paste directly.
 
+---
+
 **`headers_auth.json` is equivalent to your logged-in session — never commit it or share it.** It's already gitignored.
 
 Verify auth works before going further:
@@ -52,7 +73,7 @@ Verify auth works before going further:
 python scripts/test_search.py
 ```
 
-These headers expire/rotate periodically. If tools start failing with an auth error, redo this step.
+These headers expire/rotate periodically. If tools start failing with an auth error, redo whichever setup option you used.
 
 ### 3. Add to Claude Code
 
@@ -81,7 +102,7 @@ pytest
 
 Tool calls translate common failure modes into clear messages instead of raw tracebacks:
 
-- Missing/expired/malformed auth → tells you to rerun `scripts/setup_auth_from_file.py`.
+- Missing/expired/malformed auth → tells you to redo the [authenticate step](#2-authenticate) (`scripts/setup_auth_from_browser.py` or `scripts/setup_auth_from_file.py`).
 - Rate limiting (HTTP 429) → tells you to wait and retry.
 - Gated/restricted content → reported as unavailable rather than crashing.
 - Network errors → reported directly.
