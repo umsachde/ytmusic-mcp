@@ -81,9 +81,12 @@ def search_music(query: str, filter: str | None = None, limit: int = 20) -> list
 
 @mcp.tool()
 @handle_errors
-def get_playlists() -> list[dict[str, Any]]:
-    """List your YouTube Music library playlists."""
-    return _client().get_library_playlists()
+def get_playlists(limit: int | None = None) -> list[dict[str, Any]]:
+    """List your YouTube Music library playlists.
+
+    limit: max playlists to return. Omit (or pass null) to fetch all of them.
+    """
+    return _client().get_library_playlists(limit=limit)
 
 
 @mcp.tool()
@@ -170,6 +173,42 @@ def logout() -> str:
 def get_history() -> list[dict[str, Any]]:
     """Get recent play history."""
     return _client().get_history()
+
+
+@mcp.tool()
+@handle_errors
+def get_watch_playlist(video_id: str, limit: int = 25, radio: bool = True) -> dict[str, Any]:
+    """Get the watch-next queue for a song -- its radio/autoplay tracks.
+
+    Returns a dict with a "tracks" list and a "related" browse ID (feed it to
+    get_song_related for a second, independently-generated set of similar
+    songs). radio=True (the default) requests the radio-mix ordering rather
+    than a plain queue.
+    """
+    return _client().get_watch_playlist(videoId=video_id, limit=limit, radio=radio)
+
+
+@mcp.tool()
+@handle_errors
+def get_song_related(browse_id: str) -> list[dict[str, Any]]:
+    """Get "related content" sections for a song -- the browse ID for this
+    comes from get_watch_playlist's "related" field.
+
+    Distinct from get_watch_playlist's radio: a separate, independently
+    generated similarity signal.
+    """
+    return _client().get_song_related(browse_id)
+
+
+@mcp.tool()
+@handle_errors
+def get_artist(browse_id: str) -> dict[str, Any]:
+    """Get an artist's page: top songs, albums, and related artists.
+
+    browse_id is the artist's channel ID, e.g. from a search result's or a
+    track's "artists" entry.
+    """
+    return _client().get_artist(browse_id)
 
 
 if __name__ == "__main__":

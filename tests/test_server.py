@@ -22,9 +22,12 @@ from server import (
     AUTH_PATH,
     add_to_playlist,
     create_playlist,
+    get_artist,
     get_history,
     get_playlist_tracks,
     get_playlists,
+    get_song_related,
+    get_watch_playlist,
     handle_errors,
     remove_from_playlist,
     remove_playlist,
@@ -40,18 +43,25 @@ class _FakeYT:
         playlists=None,
         history=None,
         create_playlist_result=None,
+        watch_playlists=None,
+        related_sections=None,
+        artists=None,
     ):
         self._search_results = search_results if search_results is not None else []
         self._library_playlists = library_playlists if library_playlists is not None else []
         self._playlists = playlists or {}
         self._history = history if history is not None else []
         self._create_playlist_result = create_playlist_result
+        self._watch_playlists = watch_playlists or {}
+        self._related_sections = related_sections or {}
+        self._artists = artists or {}
 
         self.search_calls = []
         self.add_playlist_items_calls = []
         self.remove_playlist_items_calls = []
         self.delete_playlist_calls = []
         self.create_playlist_calls = []
+        self.get_library_playlists_calls = []
 
     def search(self, query, filter=None, limit=20):
         self.search_calls.append((query, filter, limit))
@@ -60,8 +70,27 @@ class _FakeYT:
             raise result
         return result
 
-    def get_library_playlists(self):
+    def get_library_playlists(self, limit=25):
+        self.get_library_playlists_calls.append(limit)
         result = self._library_playlists
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def get_watch_playlist(self, videoId=None, limit=25, radio=False):
+        result = self._watch_playlists[videoId]
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def get_song_related(self, browseId):
+        result = self._related_sections[browseId]
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def get_artist(self, channelId):
+        result = self._artists[channelId]
         if isinstance(result, Exception):
             raise result
         return result
@@ -121,6 +150,24 @@ def test_get_playlists_passes_through(monkeypatch):
     monkeypatch.setattr(server, "_client", lambda: yt)
 
     assert get_playlists() == [{"playlistId": "PL1", "title": "My Playlist"}]
+
+
+def test_get_playlists_defaults_to_no_limit(monkeypatch):
+    yt = _FakeYT()
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    get_playlists()
+
+    assert yt.get_library_playlists_calls == [None]
+
+
+def test_get_playlists_passes_explicit_limit(monkeypatch):
+    yt = _FakeYT()
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    get_playlists(limit=5)
+
+    assert yt.get_library_playlists_calls == [5]
 
 
 def test_get_playlist_tracks_returns_tracks(monkeypatch):
@@ -244,6 +291,38 @@ def test_get_history_passes_through(monkeypatch):
     monkeypatch.setattr(server, "_client", lambda: yt)
 
     assert get_history() == [{"videoId": "v1", "title": "Recently Played"}]
+
+
+# --- get_watch_playlist / get_song_related / get_artist ---------------------
+
+
+def test_get_watch_playlist_passes_through(monkeypatch):
+    yt = _FakeYT(watch_playlists={"v1": {"tracks": [{"videoId": "v2"}], "related": "REL1"}})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    assert get_watch_playlist("v1") == {"tracks": [{"videoId": "v2"}], "related": "REL1"}
+
+
+def test_get_watch_playlist_missing_raises(monkeypatch):
+    yt = _FakeYT(watch_playlists={"v1": YTMusicError("gone")})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    with pytest.raises(RuntimeError, match="YouTube Music error"):
+        get_watch_playlist("v1")
+
+
+def test_get_song_related_passes_through(monkeypatch):
+    yt = _FakeYT(related_sections={"REL1": [{"contents": [{"videoId": "v3"}]}]})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    assert get_song_related("REL1") == [{"contents": [{"videoId": "v3"}]}]
+
+
+def test_get_artist_passes_through(monkeypatch):
+    yt = _FakeYT(artists={"UC1": {"name": "Some Artist", "songs": {"results": []}}})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    assert get_artist("UC1") == {"name": "Some Artist", "songs": {"results": []}}
 
 
 # --- handle_errors -------------------------------------------------------

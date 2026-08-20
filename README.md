@@ -9,14 +9,19 @@ An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https:/
 | Tool | Description |
 | --- | --- |
 | `search_music(query, filter=None, limit=20)` | Search YouTube Music. `filter` is one of `songs`, `videos`, `albums`, `artists`, `playlists`, `community_playlists`, `featured_playlists`, `profiles`, `podcasts`, `episodes`. |
-| `get_playlists()` | List your library playlists. |
-| `get_playlist_tracks(playlist_id)` | Get the tracks in a playlist. |
+| `get_playlists(limit=None)` | List your library playlists. Omit `limit` to fetch all of them. |
+| `get_playlist_tracks(playlist_id, limit=None)` | Get the tracks in a playlist. Omit `limit` to fetch the entire playlist. |
 | `create_playlist(name, description="")` | Create a new private playlist, returns its ID. |
 | `add_to_playlist(playlist_id, video_id)` | Add a track to a playlist. |
 | `remove_from_playlist(playlist_id, video_id)` | Remove every occurrence of a track from a playlist by video ID. |
 | `remove_playlist(playlist_id)` | Permanently delete a playlist you own. Refuses to touch the auto playlists `LM` and `SE`. |
 | `get_history()` | Get your recent play history. |
+| `get_watch_playlist(video_id, limit=25, radio=True)` | Get the radio/autoplay queue for a song — one of two independent similarity signals. |
+| `get_song_related(browse_id)` | Get "related content" sections for a song (the `browse_id` comes from `get_watch_playlist`'s `related` field) — the other independent similarity signal. |
+| `get_artist(browse_id)` | Get an artist's page: top songs, albums, related artists. |
 | `logout()` | Delete the local auth file, revoking this server's stored YouTube Music authorization. |
+
+Other Claude Code projects on this machine (e.g. `re-com`) call these tools by spawning this server over MCP rather than talking to `ytmusicapi`/YouTube Music themselves — this is the only place YouTube Music credentials live.
 
 **Not included (v1):** BPM-based recommendations. YouTube Music doesn't expose tempo data, so this would need a second data source (e.g. an audio analysis API) — a stretch goal for a future version, not part of this build.
 
