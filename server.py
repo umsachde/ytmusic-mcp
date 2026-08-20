@@ -149,6 +149,23 @@ def remove_playlist(playlist_id: str) -> str:
 
 
 @mcp.tool()
+def logout() -> str:
+    """Delete the stored YouTube Music authorization.
+
+    Removes the local auth file (headers_auth.json by default, or
+    YTMUSIC_AUTH_PATH if set) and clears the cached client. Subsequent
+    tool calls will fail until you re-authenticate via
+    scripts/setup_auth_from_browser.py (or setup_auth_from_file.py).
+    """
+    global _yt
+    if not os.path.exists(AUTH_PATH):
+        return f"No auth file found at {AUTH_PATH}; nothing to remove."
+    os.remove(AUTH_PATH)
+    _yt = None
+    return f"Removed {AUTH_PATH}. Re-run scripts/setup_auth_from_browser.py to authenticate again."
+
+
+@mcp.tool()
 @handle_errors
 def get_history() -> list[dict[str, Any]]:
     """Get recent play history."""

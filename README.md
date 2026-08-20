@@ -1,5 +1,7 @@
 # ytmusic-mcp
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/umsachde-commendation-19gofo)](https://m8ven.ai/mcp/umsachde-commendation-19gofo)
+
 An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https://github.com/sigma67/ytmusicapi) so Claude (or any MCP client) can search YouTube Music, manage your playlists, and read your listening history.
 
 ## Tools
@@ -14,6 +16,7 @@ An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https:/
 | `remove_from_playlist(playlist_id, video_id)` | Remove every occurrence of a track from a playlist by video ID. |
 | `remove_playlist(playlist_id)` | Permanently delete a playlist you own. Refuses to touch the auto playlists `LM` and `SE`. |
 | `get_history()` | Get your recent play history. |
+| `logout()` | Delete the local auth file, revoking this server's stored YouTube Music authorization. |
 
 **Not included (v1):** BPM-based recommendations. YouTube Music doesn't expose tempo data, so this would need a second data source (e.g. an audio analysis API) — a stretch goal for a future version, not part of this build.
 
