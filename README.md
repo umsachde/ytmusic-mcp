@@ -18,6 +18,7 @@ An [MCP](https://modelcontextprotocol.io) server that wraps [ytmusicapi](https:/
 | `get_history()` | Get your recent play history. |
 | `get_watch_playlist(video_id, limit=25, radio=True)` | Get the radio/autoplay queue for a song — one of two independent similarity signals. |
 | `get_song_related(browse_id)` | Get "related content" sections for a song (the `browse_id` comes from `get_watch_playlist`'s `related` field) — the other independent similarity signal. |
+| `get_lyrics(browse_id)` | Get a song's lyrics (the `browse_id` comes from `get_watch_playlist`'s `lyrics` field). Feeds `re-com`'s lyric-based mood labelling. |
 | `get_artist(browse_id)` | Get an artist's page: top songs, albums, related artists. |
 | `logout()` | Delete the local auth file, revoking this server's stored YouTube Music authorization. |
 
