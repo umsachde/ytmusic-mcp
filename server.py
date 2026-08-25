@@ -202,6 +202,19 @@ def get_song_related(browse_id: str) -> list[dict[str, Any]]:
 
 @mcp.tool()
 @handle_errors
+def get_lyrics(browse_id: str) -> dict[str, Any]:
+    """Get a song's lyrics. The browse ID comes from get_watch_playlist's
+    "lyrics" field, which is absent for songs that have none.
+
+    Returns {"lyrics": ..., "source": ...}. Many songs genuinely have no
+    lyrics available, which is a normal empty result rather than an error --
+    callers are expected to cache that negative answer rather than re-ask.
+    """
+    return _client().get_lyrics(browse_id)
+
+
+@mcp.tool()
+@handle_errors
 def get_artist(browse_id: str) -> dict[str, Any]:
     """Get an artist's page: top songs, albums, and related artists.
 

@@ -26,6 +26,7 @@ from server import (
     get_history,
     get_playlist_tracks,
     get_playlists,
+    get_lyrics,
     get_song_related,
     get_watch_playlist,
     handle_errors,
@@ -46,6 +47,7 @@ class _FakeYT:
         watch_playlists=None,
         related_sections=None,
         artists=None,
+        lyrics=None,
     ):
         self._search_results = search_results if search_results is not None else []
         self._library_playlists = library_playlists if library_playlists is not None else []
@@ -55,6 +57,7 @@ class _FakeYT:
         self._watch_playlists = watch_playlists or {}
         self._related_sections = related_sections or {}
         self._artists = artists or {}
+        self._lyrics = lyrics or {}
 
         self.search_calls = []
         self.add_playlist_items_calls = []
@@ -85,6 +88,12 @@ class _FakeYT:
 
     def get_song_related(self, browseId):
         result = self._related_sections[browseId]
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def get_lyrics(self, browseId):
+        result = self._lyrics[browseId]
         if isinstance(result, Exception):
             raise result
         return result
@@ -316,6 +325,21 @@ def test_get_song_related_passes_through(monkeypatch):
     monkeypatch.setattr(server, "_client", lambda: yt)
 
     assert get_song_related("REL1") == [{"contents": [{"videoId": "v3"}]}]
+
+
+def test_get_lyrics_passes_through(monkeypatch):
+    yt = _FakeYT(lyrics={"LYR1": {"lyrics": "some words", "source": "Musixmatch"}})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    assert get_lyrics("LYR1") == {"lyrics": "some words", "source": "Musixmatch"}
+
+
+def test_get_lyrics_reports_a_failure_cleanly(monkeypatch):
+    yt = _FakeYT(lyrics={"LYR1": YTMusicError("nope")})
+    monkeypatch.setattr(server, "_client", lambda: yt)
+
+    with pytest.raises(RuntimeError, match="YouTube Music error"):
+        get_lyrics("LYR1")
 
 
 def test_get_artist_passes_through(monkeypatch):
